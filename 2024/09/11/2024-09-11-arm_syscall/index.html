@@ -1,0 +1,6524 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/images/icons/favicon-16x16.png?v=2.8.0" type="image/png" sizes="16x16"><link rel="icon" href="/images/icons/favicon-32x32.png?v=2.8.0" type="image/png" sizes="32x32"><meta name="description" content="arm syscall                           arm64">
+<meta property="og:type" content="article">
+<meta property="og:title" content="arm_syscall">
+<meta property="og:url" content="http://example.com/2024/09/11/2024-09-11-arm_syscall/index.html">
+<meta property="og:site_name" content="K 4 R A 5 U">
+<meta property="og:description" content="arm syscall                           arm64">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-09-10T23:08:08.000Z">
+<meta property="article:modified_time" content="2024-09-12T03:32:41.723Z">
+<meta property="article:author" content="k4ra5u">
+<meta name="twitter:card" content="summary"><title>arm_syscall | K 4 R A 5 U</title><link ref="canonical" href="http://example.com/2024/09/11/2024-09-11-arm_syscall/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.8.0"><link rel="stylesheet" href="css/custom.css"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  assistSearch: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: {"enable":true,"showOnPost":false,"scrollDownIcon":true},
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"default","highlight":"dark","wordWrap":false},
+  reward: false,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: undefined,
+  lazyload: false,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 7.3.0"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">arm_syscall</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2024-09-11</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2024-09-12</span></span></div></header><div class="post-body">
+        <h1 id="arm-syscall"   >
+          <a href="#arm-syscall" class="heading-link"><i class="fas fa-link"></i></a><a href="#arm-syscall" class="headerlink" title="arm syscall"></a>arm syscall</h1>
+      
+        <h2 id="arm64"   >
+          <a href="#arm64" class="heading-link"><i class="fas fa-link"></i></a><a href="#arm64" class="headerlink" title="arm64"></a>arm64</h2>
+      <span id="more"></span>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>NR</th>
+<th>syscall name</th>
+<th>%x8</th>
+<th>arg0 (%x0)</th>
+<th>arg1 (%x1)</th>
+<th>arg2 (%x2)</th>
+<th>arg3 (%x3)</th>
+<th>arg4 (%x4)</th>
+<th>arg5 (%x5)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>io_setup</td>
+<td>0x00</td>
+<td>unsigned nr_reqs</td>
+<td>aio_context_t *ctx</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>1</td>
+<td>io_destroy</td>
+<td>0x01</td>
+<td>aio_context_t ctx</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>2</td>
+<td>io_submit</td>
+<td>0x02</td>
+<td>aio_context_t</td>
+<td>long</td>
+<td>struct iocb * *</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>3</td>
+<td>io_cancel</td>
+<td>0x03</td>
+<td>aio_context_t ctx_id</td>
+<td>struct iocb *iocb</td>
+<td>struct io_event *result</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>4</td>
+<td>io_getevents</td>
+<td>0x04</td>
+<td>aio_context_t ctx_id</td>
+<td>long min_nr</td>
+<td>long nr</td>
+<td>struct io_event *events</td>
+<td>struct __kernel_timespec *timeout</td>
+<td>-</td>
+</tr>
+<tr>
+<td>5</td>
+<td>setxattr</td>
+<td>0x05</td>
+<td>const char *path</td>
+<td>const char *name</td>
+<td>const void *value</td>
+<td>size_t size</td>
+<td>int flags</td>
+<td>-</td>
+</tr>
+<tr>
+<td>6</td>
+<td>lsetxattr</td>
+<td>0x06</td>
+<td>const char *path</td>
+<td>const char *name</td>
+<td>const void *value</td>
+<td>size_t size</td>
+<td>int flags</td>
+<td>-</td>
+</tr>
+<tr>
+<td>7</td>
+<td>fsetxattr</td>
+<td>0x07</td>
+<td>int fd</td>
+<td>const char *name</td>
+<td>const void *value</td>
+<td>size_t size</td>
+<td>int flags</td>
+<td>-</td>
+</tr>
+<tr>
+<td>8</td>
+<td>getxattr</td>
+<td>0x08</td>
+<td>const char *path</td>
+<td>const char *name</td>
+<td>void *value</td>
+<td>size_t size</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>9</td>
+<td>lgetxattr</td>
+<td>0x09</td>
+<td>const char *path</td>
+<td>const char *name</td>
+<td>void *value</td>
+<td>size_t size</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>10</td>
+<td>fgetxattr</td>
+<td>0x0a</td>
+<td>int fd</td>
+<td>const char *name</td>
+<td>void *value</td>
+<td>size_t size</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>11</td>
+<td>listxattr</td>
+<td>0x0b</td>
+<td>const char *path</td>
+<td>char *list</td>
+<td>size_t size</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>12</td>
+<td>llistxattr</td>
+<td>0x0c</td>
+<td>const char *path</td>
+<td>char *list</td>
+<td>size_t size</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>13</td>
+<td>flistxattr</td>
+<td>0x0d</td>
+<td>int fd</td>
+<td>char *list</td>
+<td>size_t size</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>14</td>
+<td>removexattr</td>
+<td>0x0e</td>
+<td>const char *path</td>
+<td>const char *name</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>15</td>
+<td>lremovexattr</td>
+<td>0x0f</td>
+<td>const char *path</td>
+<td>const char *name</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>16</td>
+<td>fremovexattr</td>
+<td>0x10</td>
+<td>int fd</td>
+<td>const char *name</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>17</td>
+<td>getcwd</td>
+<td>0x11</td>
+<td>char *buf</td>
+<td>unsigned long size</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>18</td>
+<td>lookup_dcookie</td>
+<td>0x12</td>
+<td>u64 cookie64</td>
+<td>char *buf</td>
+<td>size_t len</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>19</td>
+<td>eventfd2</td>
+<td>0x13</td>
+<td>unsigned int count</td>
+<td>int flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>20</td>
+<td>epoll_create1</td>
+<td>0x14</td>
+<td>int flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>21</td>
+<td>epoll_ctl</td>
+<td>0x15</td>
+<td>int epfd</td>
+<td>int op</td>
+<td>int fd</td>
+<td>struct epoll_event *event</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>22</td>
+<td>epoll_pwait</td>
+<td>0x16</td>
+<td>int epfd</td>
+<td>struct epoll_event *events</td>
+<td>int maxevents</td>
+<td>int timeout</td>
+<td>const sigset_t *sigmask</td>
+<td>size_t sigsetsize</td>
+</tr>
+<tr>
+<td>23</td>
+<td>dup</td>
+<td>0x17</td>
+<td>unsigned int fildes</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>24</td>
+<td>dup3</td>
+<td>0x18</td>
+<td>unsigned int oldfd</td>
+<td>unsigned int newfd</td>
+<td>int flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>25</td>
+<td>fcntl</td>
+<td>0x19</td>
+<td>unsigned int fd</td>
+<td>unsigned int cmd</td>
+<td>unsigned long arg</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>26</td>
+<td>inotify_init1</td>
+<td>0x1a</td>
+<td>int flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>27</td>
+<td>inotify_add_watch</td>
+<td>0x1b</td>
+<td>int fd</td>
+<td>const char *path</td>
+<td>u32 mask</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>28</td>
+<td>inotify_rm_watch</td>
+<td>0x1c</td>
+<td>int fd</td>
+<td>__s32 wd</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>29</td>
+<td>ioctl</td>
+<td>0x1d</td>
+<td>unsigned int fd</td>
+<td>unsigned int cmd</td>
+<td>unsigned long arg</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>30</td>
+<td>ioprio_set</td>
+<td>0x1e</td>
+<td>int which</td>
+<td>int who</td>
+<td>int ioprio</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>31</td>
+<td>ioprio_get</td>
+<td>0x1f</td>
+<td>int which</td>
+<td>int who</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>32</td>
+<td>flock</td>
+<td>0x20</td>
+<td>unsigned int fd</td>
+<td>unsigned int cmd</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>33</td>
+<td>mknodat</td>
+<td>0x21</td>
+<td>int dfd</td>
+<td>const char * filename</td>
+<td>umode_t mode</td>
+<td>unsigned dev</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>34</td>
+<td>mkdirat</td>
+<td>0x22</td>
+<td>int dfd</td>
+<td>const char * pathname</td>
+<td>umode_t mode</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>35</td>
+<td>unlinkat</td>
+<td>0x23</td>
+<td>int dfd</td>
+<td>const char * pathname</td>
+<td>int flag</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>36</td>
+<td>symlinkat</td>
+<td>0x24</td>
+<td>const char * oldname</td>
+<td>int newdfd</td>
+<td>const char * newname</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>37</td>
+<td>linkat</td>
+<td>0x25</td>
+<td>int olddfd</td>
+<td>const char *oldname</td>
+<td>int newdfd</td>
+<td>const char *newname</td>
+<td>int flags</td>
+<td>-</td>
+</tr>
+<tr>
+<td>38</td>
+<td>renameat</td>
+<td>0x26</td>
+<td>int olddfd</td>
+<td>const char * oldname</td>
+<td>int newdfd</td>
+<td>const char * newname</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>39</td>
+<td>umount2</td>
+<td>0x27</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>40</td>
+<td>mount</td>
+<td>0x28</td>
+<td>char *dev_name</td>
+<td>char *dir_name</td>
+<td>char *type</td>
+<td>unsigned long flags</td>
+<td>void *data</td>
+<td>-</td>
+</tr>
+<tr>
+<td>41</td>
+<td>pivot_root</td>
+<td>0x29</td>
+<td>const char *new_root</td>
+<td>const char *put_old</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>42</td>
+<td>nfsservctl</td>
+<td>0x2a</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>43</td>
+<td>statfs</td>
+<td>0x2b</td>
+<td>const char * path</td>
+<td>struct statfs *buf</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>44</td>
+<td>fstatfs</td>
+<td>0x2c</td>
+<td>unsigned int fd</td>
+<td>struct statfs *buf</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>45</td>
+<td>truncate</td>
+<td>0x2d</td>
+<td>const char *path</td>
+<td>long length</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>46</td>
+<td>ftruncate</td>
+<td>0x2e</td>
+<td>unsigned int fd</td>
+<td>unsigned long length</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>47</td>
+<td>fallocate</td>
+<td>0x2f</td>
+<td>int fd</td>
+<td>int mode</td>
+<td>loff_t offset</td>
+<td>loff_t len</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>48</td>
+<td>faccessat</td>
+<td>0x30</td>
+<td>int dfd</td>
+<td>const char *filename</td>
+<td>int mode</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>49</td>
+<td>chdir</td>
+<td>0x31</td>
+<td>const char *filename</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>50</td>
+<td>fchdir</td>
+<td>0x32</td>
+<td>unsigned int fd</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>51</td>
+<td>chroot</td>
+<td>0x33</td>
+<td>const char *filename</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>52</td>
+<td>fchmod</td>
+<td>0x34</td>
+<td>unsigned int fd</td>
+<td>umode_t mode</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>53</td>
+<td>fchmodat</td>
+<td>0x35</td>
+<td>int dfd</td>
+<td>const char * filename</td>
+<td>umode_t mode</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>54</td>
+<td>fchownat</td>
+<td>0x36</td>
+<td>int dfd</td>
+<td>const char *filename</td>
+<td>uid_t user</td>
+<td>gid_t group</td>
+<td>int flag</td>
+<td>-</td>
+</tr>
+<tr>
+<td>55</td>
+<td>fchown</td>
+<td>0x37</td>
+<td>unsigned int fd</td>
+<td>uid_t user</td>
+<td>gid_t group</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>56</td>
+<td>openat</td>
+<td>0x38</td>
+<td>int dfd</td>
+<td>const char *filename</td>
+<td>int flags</td>
+<td>umode_t mode</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>57</td>
+<td>close</td>
+<td>0x39</td>
+<td>unsigned int fd</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>58</td>
+<td>vhangup</td>
+<td>0x3a</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>59</td>
+<td>pipe2</td>
+<td>0x3b</td>
+<td>int *fildes</td>
+<td>int flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>60</td>
+<td>quotactl</td>
+<td>0x3c</td>
+<td>unsigned int cmd</td>
+<td>const char *special</td>
+<td>qid_t id</td>
+<td>void *addr</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>61</td>
+<td>getdents64</td>
+<td>0x3d</td>
+<td>unsigned int fd</td>
+<td>struct linux_dirent64 *dirent</td>
+<td>unsigned int count</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>62</td>
+<td>lseek</td>
+<td>0x3e</td>
+<td>unsigned int fd</td>
+<td>off_t offset</td>
+<td>unsigned int whence</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>63</td>
+<td>read</td>
+<td>0x3f</td>
+<td>unsigned int fd</td>
+<td>char *buf</td>
+<td>size_t count</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>64</td>
+<td>write</td>
+<td>0x40</td>
+<td>unsigned int fd</td>
+<td>const char *buf</td>
+<td>size_t count</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>65</td>
+<td>readv</td>
+<td>0x41</td>
+<td>unsigned long fd</td>
+<td>const struct iovec *vec</td>
+<td>unsigned long vlen</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>66</td>
+<td>writev</td>
+<td>0x42</td>
+<td>unsigned long fd</td>
+<td>const struct iovec *vec</td>
+<td>unsigned long vlen</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>67</td>
+<td>pread64</td>
+<td>0x43</td>
+<td>unsigned int fd</td>
+<td>char *buf</td>
+<td>size_t count</td>
+<td>loff_t pos</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>68</td>
+<td>pwrite64</td>
+<td>0x44</td>
+<td>unsigned int fd</td>
+<td>const char *buf</td>
+<td>size_t count</td>
+<td>loff_t pos</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>69</td>
+<td>preadv</td>
+<td>0x45</td>
+<td>unsigned long fd</td>
+<td>const struct iovec *vec</td>
+<td>unsigned long vlen</td>
+<td>unsigned long pos_l</td>
+<td>unsigned long pos_h</td>
+<td>-</td>
+</tr>
+<tr>
+<td>70</td>
+<td>pwritev</td>
+<td>0x46</td>
+<td>unsigned long fd</td>
+<td>const struct iovec *vec</td>
+<td>unsigned long vlen</td>
+<td>unsigned long pos_l</td>
+<td>unsigned long pos_h</td>
+<td>-</td>
+</tr>
+<tr>
+<td>71</td>
+<td>sendfile</td>
+<td>0x47</td>
+<td>int out_fd</td>
+<td>int in_fd</td>
+<td>off_t *offset</td>
+<td>size_t count</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>72</td>
+<td>pselect6</td>
+<td>0x48</td>
+<td>int</td>
+<td>fd_set *</td>
+<td>fd_set *</td>
+<td>fd_set *</td>
+<td>struct __kernel_timespec *</td>
+<td>void *</td>
+</tr>
+<tr>
+<td>73</td>
+<td>ppoll</td>
+<td>0x49</td>
+<td>struct pollfd *</td>
+<td>unsigned int</td>
+<td>struct __kernel_timespec *</td>
+<td>const sigset_t *</td>
+<td>size_t</td>
+<td>-</td>
+</tr>
+<tr>
+<td>74</td>
+<td>signalfd4</td>
+<td>0x4a</td>
+<td>int ufd</td>
+<td>sigset_t *user_mask</td>
+<td>size_t sizemask</td>
+<td>int flags</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>75</td>
+<td>vmsplice</td>
+<td>0x4b</td>
+<td>int fd</td>
+<td>const struct iovec *iov</td>
+<td>unsigned long nr_segs</td>
+<td>unsigned int flags</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>76</td>
+<td>splice</td>
+<td>0x4c</td>
+<td>int fd_in</td>
+<td>loff_t *off_in</td>
+<td>int fd_out</td>
+<td>loff_t *off_out</td>
+<td>size_t len</td>
+<td>unsigned int flags</td>
+</tr>
+<tr>
+<td>77</td>
+<td>tee</td>
+<td>0x4d</td>
+<td>int fdin</td>
+<td>int fdout</td>
+<td>size_t len</td>
+<td>unsigned int flags</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>78</td>
+<td>readlinkat</td>
+<td>0x4e</td>
+<td>int dfd</td>
+<td>const char *path</td>
+<td>char *buf</td>
+<td>int bufsiz</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>79</td>
+<td>newfstatat</td>
+<td>0x4f</td>
+<td>int dfd</td>
+<td>const char *filename</td>
+<td>struct stat *statbuf</td>
+<td>int flag</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>80</td>
+<td>fstat</td>
+<td>0x50</td>
+<td>unsigned int fd</td>
+<td>struct __old_kernel_stat *statbuf</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>81</td>
+<td>sync</td>
+<td>0x51</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>82</td>
+<td>fsync</td>
+<td>0x52</td>
+<td>unsigned int fd</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>83</td>
+<td>fdatasync</td>
+<td>0x53</td>
+<td>unsigned int fd</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>84</td>
+<td>sync_file_range</td>
+<td>0x54</td>
+<td>int fd</td>
+<td>loff_t offset</td>
+<td>loff_t nbytes</td>
+<td>unsigned int flags</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>85</td>
+<td>timerfd_create</td>
+<td>0x55</td>
+<td>int clockid</td>
+<td>int flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>86</td>
+<td>timerfd_settime</td>
+<td>0x56</td>
+<td>int ufd</td>
+<td>int flags</td>
+<td>const struct __kernel_itimerspec *utmr</td>
+<td>struct __kernel_itimerspec *otmr</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>87</td>
+<td>timerfd_gettime</td>
+<td>0x57</td>
+<td>int ufd</td>
+<td>struct __kernel_itimerspec *otmr</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>88</td>
+<td>utimensat</td>
+<td>0x58</td>
+<td>int dfd</td>
+<td>const char *filename</td>
+<td>struct __kernel_timespec *utimes</td>
+<td>int flags</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>89</td>
+<td>acct</td>
+<td>0x59</td>
+<td>const char *name</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>90</td>
+<td>capget</td>
+<td>0x5a</td>
+<td>cap_user_header_t header</td>
+<td>cap_user_data_t dataptr</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>91</td>
+<td>capset</td>
+<td>0x5b</td>
+<td>cap_user_header_t header</td>
+<td>const cap_user_data_t data</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>92</td>
+<td>personality</td>
+<td>0x5c</td>
+<td>unsigned int personality</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>93</td>
+<td>exit</td>
+<td>0x5d</td>
+<td>int error_code</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>94</td>
+<td>exit_group</td>
+<td>0x5e</td>
+<td>int error_code</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>95</td>
+<td>waitid</td>
+<td>0x5f</td>
+<td>int which</td>
+<td>pid_t pid</td>
+<td>struct siginfo *infop</td>
+<td>int options</td>
+<td>struct rusage *ru</td>
+<td>-</td>
+</tr>
+<tr>
+<td>96</td>
+<td>set_tid_address</td>
+<td>0x60</td>
+<td>int *tidptr</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>97</td>
+<td>unshare</td>
+<td>0x61</td>
+<td>unsigned long unshare_flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>98</td>
+<td>futex</td>
+<td>0x62</td>
+<td>u32 *uaddr</td>
+<td>int op</td>
+<td>u32 val</td>
+<td>const struct __kernel_timespec *utime</td>
+<td>u32 *uaddr2</td>
+<td>u32 val3</td>
+</tr>
+<tr>
+<td>99</td>
+<td>set_robust_list</td>
+<td>0x63</td>
+<td>struct robust_list_head *head</td>
+<td>size_t len</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>100</td>
+<td>get_robust_list</td>
+<td>0x64</td>
+<td>int pid</td>
+<td>struct robust_list_head * *head_ptr</td>
+<td>size_t *len_ptr</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>101</td>
+<td>nanosleep</td>
+<td>0x65</td>
+<td>struct __kernel_timespec *rqtp</td>
+<td>struct __kernel_timespec *rmtp</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>102</td>
+<td>getitimer</td>
+<td>0x66</td>
+<td>int which</td>
+<td>struct __kernel_old_itimerval *value</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>103</td>
+<td>setitimer</td>
+<td>0x67</td>
+<td>int which</td>
+<td>struct __kernel_old_itimerval *value</td>
+<td>struct __kernel_old_itimerval *ovalue</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>104</td>
+<td>kexec_load</td>
+<td>0x68</td>
+<td>unsigned long entry</td>
+<td>unsigned long nr_segments</td>
+<td>struct kexec_segment *segments</td>
+<td>unsigned long flags</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>105</td>
+<td>init_module</td>
+<td>0x69</td>
+<td>void *umod</td>
+<td>unsigned long len</td>
+<td>const char *uargs</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>106</td>
+<td>delete_module</td>
+<td>0x6a</td>
+<td>const char *name_user</td>
+<td>unsigned int flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>107</td>
+<td>timer_create</td>
+<td>0x6b</td>
+<td>clockid_t which_clock</td>
+<td>struct sigevent *timer_event_spec</td>
+<td>timer_t * created_timer_id</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>108</td>
+<td>timer_gettime</td>
+<td>0x6c</td>
+<td>timer_t timer_id</td>
+<td>struct __kernel_itimerspec *setting</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>109</td>
+<td>timer_getoverrun</td>
+<td>0x6d</td>
+<td>timer_t timer_id</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>110</td>
+<td>timer_settime</td>
+<td>0x6e</td>
+<td>timer_t timer_id</td>
+<td>int flags</td>
+<td>const struct __kernel_itimerspec *new_setting</td>
+<td>struct __kernel_itimerspec *old_setting</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>111</td>
+<td>timer_delete</td>
+<td>0x6f</td>
+<td>timer_t timer_id</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>112</td>
+<td>clock_settime</td>
+<td>0x70</td>
+<td>clockid_t which_clock</td>
+<td>const struct __kernel_timespec *tp</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>113</td>
+<td>clock_gettime</td>
+<td>0x71</td>
+<td>clockid_t which_clock</td>
+<td>struct __kernel_timespec *tp</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>114</td>
+<td>clock_getres</td>
+<td>0x72</td>
+<td>clockid_t which_clock</td>
+<td>struct __kernel_timespec *tp</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>115</td>
+<td>clock_nanosleep</td>
+<td>0x73</td>
+<td>clockid_t which_clock</td>
+<td>int flags</td>
+<td>const struct __kernel_timespec *rqtp</td>
+<td>struct __kernel_timespec *rmtp</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>116</td>
+<td>syslog</td>
+<td>0x74</td>
+<td>int type</td>
+<td>char *buf</td>
+<td>int len</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>117</td>
+<td>ptrace</td>
+<td>0x75</td>
+<td>long request</td>
+<td>long pid</td>
+<td>unsigned long addr</td>
+<td>unsigned long data</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>118</td>
+<td>sched_setparam</td>
+<td>0x76</td>
+<td>pid_t pid</td>
+<td>struct sched_param *param</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>119</td>
+<td>sched_setscheduler</td>
+<td>0x77</td>
+<td>pid_t pid</td>
+<td>int policy</td>
+<td>struct sched_param *param</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>120</td>
+<td>sched_getscheduler</td>
+<td>0x78</td>
+<td>pid_t pid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>121</td>
+<td>sched_getparam</td>
+<td>0x79</td>
+<td>pid_t pid</td>
+<td>struct sched_param *param</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>122</td>
+<td>sched_setaffinity</td>
+<td>0x7a</td>
+<td>pid_t pid</td>
+<td>unsigned int len</td>
+<td>unsigned long *user_mask_ptr</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>123</td>
+<td>sched_getaffinity</td>
+<td>0x7b</td>
+<td>pid_t pid</td>
+<td>unsigned int len</td>
+<td>unsigned long *user_mask_ptr</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>124</td>
+<td>sched_yield</td>
+<td>0x7c</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>125</td>
+<td>sched_get_priority_max</td>
+<td>0x7d</td>
+<td>int policy</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>126</td>
+<td>sched_get_priority_min</td>
+<td>0x7e</td>
+<td>int policy</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>127</td>
+<td>sched_rr_get_interval</td>
+<td>0x7f</td>
+<td>pid_t pid</td>
+<td>struct __kernel_timespec *interval</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>128</td>
+<td>restart_syscall</td>
+<td>0x80</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>129</td>
+<td>kill</td>
+<td>0x81</td>
+<td>pid_t pid</td>
+<td>int sig</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>130</td>
+<td>tkill</td>
+<td>0x82</td>
+<td>pid_t pid</td>
+<td>int sig</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>131</td>
+<td>tgkill</td>
+<td>0x83</td>
+<td>pid_t tgid</td>
+<td>pid_t pid</td>
+<td>int sig</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>132</td>
+<td>sigaltstack</td>
+<td>0x84</td>
+<td>const struct sigaltstack *uss</td>
+<td>struct sigaltstack *uoss</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>133</td>
+<td>rt_sigsuspend</td>
+<td>0x85</td>
+<td>sigset_t *unewset</td>
+<td>size_t sigsetsize</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>134</td>
+<td>rt_sigaction</td>
+<td>0x86</td>
+<td>int</td>
+<td>const struct sigaction *</td>
+<td>struct sigaction *</td>
+<td>size_t</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>135</td>
+<td>rt_sigprocmask</td>
+<td>0x87</td>
+<td>int how</td>
+<td>sigset_t *set</td>
+<td>sigset_t *oset</td>
+<td>size_t sigsetsize</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>136</td>
+<td>rt_sigpending</td>
+<td>0x88</td>
+<td>sigset_t *set</td>
+<td>size_t sigsetsize</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>137</td>
+<td>rt_sigtimedwait</td>
+<td>0x89</td>
+<td>const sigset_t *uthese</td>
+<td>siginfo_t *uinfo</td>
+<td>const struct __kernel_timespec *uts</td>
+<td>size_t sigsetsize</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>138</td>
+<td>rt_sigqueueinfo</td>
+<td>0x8a</td>
+<td>pid_t pid</td>
+<td>int sig</td>
+<td>siginfo_t *uinfo</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>139</td>
+<td>rt_sigreturn</td>
+<td>0x8b</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>140</td>
+<td>setpriority</td>
+<td>0x8c</td>
+<td>int which</td>
+<td>int who</td>
+<td>int niceval</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>141</td>
+<td>getpriority</td>
+<td>0x8d</td>
+<td>int which</td>
+<td>int who</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>142</td>
+<td>reboot</td>
+<td>0x8e</td>
+<td>int magic1</td>
+<td>int magic2</td>
+<td>unsigned int cmd</td>
+<td>void *arg</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>143</td>
+<td>setregid</td>
+<td>0x8f</td>
+<td>gid_t rgid</td>
+<td>gid_t egid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>144</td>
+<td>setgid</td>
+<td>0x90</td>
+<td>gid_t gid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>145</td>
+<td>setreuid</td>
+<td>0x91</td>
+<td>uid_t ruid</td>
+<td>uid_t euid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>146</td>
+<td>setuid</td>
+<td>0x92</td>
+<td>uid_t uid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>147</td>
+<td>setresuid</td>
+<td>0x93</td>
+<td>uid_t ruid</td>
+<td>uid_t euid</td>
+<td>uid_t suid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>148</td>
+<td>getresuid</td>
+<td>0x94</td>
+<td>uid_t *ruid</td>
+<td>uid_t *euid</td>
+<td>uid_t *suid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>149</td>
+<td>setresgid</td>
+<td>0x95</td>
+<td>gid_t rgid</td>
+<td>gid_t egid</td>
+<td>gid_t sgid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>150</td>
+<td>getresgid</td>
+<td>0x96</td>
+<td>gid_t *rgid</td>
+<td>gid_t *egid</td>
+<td>gid_t *sgid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>151</td>
+<td>setfsuid</td>
+<td>0x97</td>
+<td>uid_t uid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>152</td>
+<td>setfsgid</td>
+<td>0x98</td>
+<td>gid_t gid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>153</td>
+<td>times</td>
+<td>0x99</td>
+<td>struct tms *tbuf</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>154</td>
+<td>setpgid</td>
+<td>0x9a</td>
+<td>pid_t pid</td>
+<td>pid_t pgid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>155</td>
+<td>getpgid</td>
+<td>0x9b</td>
+<td>pid_t pid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>156</td>
+<td>getsid</td>
+<td>0x9c</td>
+<td>pid_t pid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>157</td>
+<td>setsid</td>
+<td>0x9d</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>158</td>
+<td>getgroups</td>
+<td>0x9e</td>
+<td>int gidsetsize</td>
+<td>gid_t *grouplist</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>159</td>
+<td>setgroups</td>
+<td>0x9f</td>
+<td>int gidsetsize</td>
+<td>gid_t *grouplist</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>160</td>
+<td>uname</td>
+<td>0xa0</td>
+<td>struct old_utsname *</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>161</td>
+<td>sethostname</td>
+<td>0xa1</td>
+<td>char *name</td>
+<td>int len</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>162</td>
+<td>setdomainname</td>
+<td>0xa2</td>
+<td>char *name</td>
+<td>int len</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>163</td>
+<td>getrlimit</td>
+<td>0xa3</td>
+<td>unsigned int resource</td>
+<td>struct rlimit *rlim</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>164</td>
+<td>setrlimit</td>
+<td>0xa4</td>
+<td>unsigned int resource</td>
+<td>struct rlimit *rlim</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>165</td>
+<td>getrusage</td>
+<td>0xa5</td>
+<td>int who</td>
+<td>struct rusage *ru</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>166</td>
+<td>umask</td>
+<td>0xa6</td>
+<td>int mask</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>167</td>
+<td>prctl</td>
+<td>0xa7</td>
+<td>int option</td>
+<td>unsigned long arg2</td>
+<td>unsigned long arg3</td>
+<td>unsigned long arg4</td>
+<td>unsigned long arg5</td>
+<td>-</td>
+</tr>
+<tr>
+<td>168</td>
+<td>getcpu</td>
+<td>0xa8</td>
+<td>unsigned *cpu</td>
+<td>unsigned *node</td>
+<td>struct getcpu_cache *cache</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>169</td>
+<td>gettimeofday</td>
+<td>0xa9</td>
+<td>struct __kernel_old_timeval *tv</td>
+<td>struct timezone *tz</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>170</td>
+<td>settimeofday</td>
+<td>0xaa</td>
+<td>struct __kernel_old_timeval *tv</td>
+<td>struct timezone *tz</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>171</td>
+<td>adjtimex</td>
+<td>0xab</td>
+<td>struct __kernel_timex *txc_p</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>172</td>
+<td>getpid</td>
+<td>0xac</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>173</td>
+<td>getppid</td>
+<td>0xad</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>174</td>
+<td>getuid</td>
+<td>0xae</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>175</td>
+<td>geteuid</td>
+<td>0xaf</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>176</td>
+<td>getgid</td>
+<td>0xb0</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>177</td>
+<td>getegid</td>
+<td>0xb1</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>178</td>
+<td>gettid</td>
+<td>0xb2</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>179</td>
+<td>sysinfo</td>
+<td>0xb3</td>
+<td>struct sysinfo *info</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>180</td>
+<td>mq_open</td>
+<td>0xb4</td>
+<td>const char *name</td>
+<td>int oflag</td>
+<td>umode_t mode</td>
+<td>struct mq_attr *attr</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>181</td>
+<td>mq_unlink</td>
+<td>0xb5</td>
+<td>const char *name</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>182</td>
+<td>mq_timedsend</td>
+<td>0xb6</td>
+<td>mqd_t mqdes</td>
+<td>const char *msg_ptr</td>
+<td>size_t msg_len</td>
+<td>unsigned int msg_prio</td>
+<td>const struct __kernel_timespec *abs_timeout</td>
+<td>-</td>
+</tr>
+<tr>
+<td>183</td>
+<td>mq_timedreceive</td>
+<td>0xb7</td>
+<td>mqd_t mqdes</td>
+<td>char *msg_ptr</td>
+<td>size_t msg_len</td>
+<td>unsigned int *msg_prio</td>
+<td>const struct __kernel_timespec *abs_timeout</td>
+<td>-</td>
+</tr>
+<tr>
+<td>184</td>
+<td>mq_notify</td>
+<td>0xb8</td>
+<td>mqd_t mqdes</td>
+<td>const struct sigevent *notification</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>185</td>
+<td>mq_getsetattr</td>
+<td>0xb9</td>
+<td>mqd_t mqdes</td>
+<td>const struct mq_attr *mqstat</td>
+<td>struct mq_attr *omqstat</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>186</td>
+<td>msgget</td>
+<td>0xba</td>
+<td>key_t key</td>
+<td>int msgflg</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>187</td>
+<td>msgctl</td>
+<td>0xbb</td>
+<td>int msqid</td>
+<td>int cmd</td>
+<td>struct msqid_ds *buf</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>188</td>
+<td>msgrcv</td>
+<td>0xbc</td>
+<td>int msqid</td>
+<td>struct msgbuf *msgp</td>
+<td>size_t msgsz</td>
+<td>long msgtyp</td>
+<td>int msgflg</td>
+<td>-</td>
+</tr>
+<tr>
+<td>189</td>
+<td>msgsnd</td>
+<td>0xbd</td>
+<td>int msqid</td>
+<td>struct msgbuf *msgp</td>
+<td>size_t msgsz</td>
+<td>int msgflg</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>190</td>
+<td>semget</td>
+<td>0xbe</td>
+<td>key_t key</td>
+<td>int nsems</td>
+<td>int semflg</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>191</td>
+<td>semctl</td>
+<td>0xbf</td>
+<td>int semid</td>
+<td>int semnum</td>
+<td>int cmd</td>
+<td>unsigned long arg</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>192</td>
+<td>semtimedop</td>
+<td>0xc0</td>
+<td>int semid</td>
+<td>struct sembuf *sops</td>
+<td>unsigned nsops</td>
+<td>const struct __kernel_timespec *timeout</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>193</td>
+<td>semop</td>
+<td>0xc1</td>
+<td>int semid</td>
+<td>struct sembuf *sops</td>
+<td>unsigned nsops</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>194</td>
+<td>shmget</td>
+<td>0xc2</td>
+<td>key_t key</td>
+<td>size_t size</td>
+<td>int flag</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>195</td>
+<td>shmctl</td>
+<td>0xc3</td>
+<td>int shmid</td>
+<td>int cmd</td>
+<td>struct shmid_ds *buf</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>196</td>
+<td>shmat</td>
+<td>0xc4</td>
+<td>int shmid</td>
+<td>char *shmaddr</td>
+<td>int shmflg</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>197</td>
+<td>shmdt</td>
+<td>0xc5</td>
+<td>char *shmaddr</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>198</td>
+<td>socket</td>
+<td>0xc6</td>
+<td>int</td>
+<td>int</td>
+<td>int</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>199</td>
+<td>socketpair</td>
+<td>0xc7</td>
+<td>int</td>
+<td>int</td>
+<td>int</td>
+<td>int *</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>200</td>
+<td>bind</td>
+<td>0xc8</td>
+<td>int</td>
+<td>struct sockaddr *</td>
+<td>int</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>201</td>
+<td>listen</td>
+<td>0xc9</td>
+<td>int</td>
+<td>int</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>202</td>
+<td>accept</td>
+<td>0xca</td>
+<td>int</td>
+<td>struct sockaddr *</td>
+<td>int *</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>203</td>
+<td>connect</td>
+<td>0xcb</td>
+<td>int</td>
+<td>struct sockaddr *</td>
+<td>int</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>204</td>
+<td>getsockname</td>
+<td>0xcc</td>
+<td>int</td>
+<td>struct sockaddr *</td>
+<td>int *</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>205</td>
+<td>getpeername</td>
+<td>0xcd</td>
+<td>int</td>
+<td>struct sockaddr *</td>
+<td>int *</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>206</td>
+<td>sendto</td>
+<td>0xce</td>
+<td>int</td>
+<td>void *</td>
+<td>size_t</td>
+<td>unsigned</td>
+<td>struct sockaddr *</td>
+<td>int</td>
+</tr>
+<tr>
+<td>207</td>
+<td>recvfrom</td>
+<td>0xcf</td>
+<td>int</td>
+<td>void *</td>
+<td>size_t</td>
+<td>unsigned</td>
+<td>struct sockaddr *</td>
+<td>int *</td>
+</tr>
+<tr>
+<td>208</td>
+<td>setsockopt</td>
+<td>0xd0</td>
+<td>int fd</td>
+<td>int level</td>
+<td>int optname</td>
+<td>char *optval</td>
+<td>int optlen</td>
+<td>-</td>
+</tr>
+<tr>
+<td>209</td>
+<td>getsockopt</td>
+<td>0xd1</td>
+<td>int fd</td>
+<td>int level</td>
+<td>int optname</td>
+<td>char *optval</td>
+<td>int *optlen</td>
+<td>-</td>
+</tr>
+<tr>
+<td>210</td>
+<td>shutdown</td>
+<td>0xd2</td>
+<td>int</td>
+<td>int</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>211</td>
+<td>sendmsg</td>
+<td>0xd3</td>
+<td>int fd</td>
+<td>struct user_msghdr *msg</td>
+<td>unsigned flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>212</td>
+<td>recvmsg</td>
+<td>0xd4</td>
+<td>int fd</td>
+<td>struct user_msghdr *msg</td>
+<td>unsigned flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>213</td>
+<td>readahead</td>
+<td>0xd5</td>
+<td>int fd</td>
+<td>loff_t offset</td>
+<td>size_t count</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>214</td>
+<td>brk</td>
+<td>0xd6</td>
+<td>unsigned long brk</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>215</td>
+<td>munmap</td>
+<td>0xd7</td>
+<td>unsigned long addr</td>
+<td>size_t len</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>216</td>
+<td>mremap</td>
+<td>0xd8</td>
+<td>unsigned long addr</td>
+<td>unsigned long old_len</td>
+<td>unsigned long new_len</td>
+<td>unsigned long flags</td>
+<td>unsigned long new_addr</td>
+<td>-</td>
+</tr>
+<tr>
+<td>217</td>
+<td>add_key</td>
+<td>0xd9</td>
+<td>const char *_type</td>
+<td>const char *_description</td>
+<td>const void *_payload</td>
+<td>size_t plen</td>
+<td>key_serial_t destringid</td>
+<td>-</td>
+</tr>
+<tr>
+<td>218</td>
+<td>request_key</td>
+<td>0xda</td>
+<td>const char *_type</td>
+<td>const char *_description</td>
+<td>const char *_callout_info</td>
+<td>key_serial_t destringid</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>219</td>
+<td>keyctl</td>
+<td>0xdb</td>
+<td>int cmd</td>
+<td>unsigned long arg2</td>
+<td>unsigned long arg3</td>
+<td>unsigned long arg4</td>
+<td>unsigned long arg5</td>
+<td>-</td>
+</tr>
+<tr>
+<td>220</td>
+<td>clone</td>
+<td>0xdc</td>
+<td>unsigned long</td>
+<td>unsigned long</td>
+<td>int *</td>
+<td>int *</td>
+<td>unsigned long</td>
+<td>-</td>
+</tr>
+<tr>
+<td>221</td>
+<td>execve</td>
+<td>0xdd</td>
+<td>const char *filename</td>
+<td>const char *const *argv</td>
+<td>const char *const *envp</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>222</td>
+<td>mmap</td>
+<td>0xde</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>223</td>
+<td>fadvise64</td>
+<td>0xdf</td>
+<td>int fd</td>
+<td>loff_t offset</td>
+<td>size_t len</td>
+<td>int advice</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>224</td>
+<td>swapon</td>
+<td>0xe0</td>
+<td>const char *specialfile</td>
+<td>int swap_flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>225</td>
+<td>swapoff</td>
+<td>0xe1</td>
+<td>const char *specialfile</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>226</td>
+<td>mprotect</td>
+<td>0xe2</td>
+<td>unsigned long start</td>
+<td>size_t len</td>
+<td>unsigned long prot</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>227</td>
+<td>msync</td>
+<td>0xe3</td>
+<td>unsigned long start</td>
+<td>size_t len</td>
+<td>int flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>228</td>
+<td>mlock</td>
+<td>0xe4</td>
+<td>unsigned long start</td>
+<td>size_t len</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>229</td>
+<td>munlock</td>
+<td>0xe5</td>
+<td>unsigned long start</td>
+<td>size_t len</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>230</td>
+<td>mlockall</td>
+<td>0xe6</td>
+<td>int flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>231</td>
+<td>munlockall</td>
+<td>0xe7</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>232</td>
+<td>mincore</td>
+<td>0xe8</td>
+<td>unsigned long start</td>
+<td>size_t len</td>
+<td>unsigned char * vec</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>233</td>
+<td>madvise</td>
+<td>0xe9</td>
+<td>unsigned long start</td>
+<td>size_t len</td>
+<td>int behavior</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>234</td>
+<td>remap_file_pages</td>
+<td>0xea</td>
+<td>unsigned long start</td>
+<td>unsigned long size</td>
+<td>unsigned long prot</td>
+<td>unsigned long pgoff</td>
+<td>unsigned long flags</td>
+<td>-</td>
+</tr>
+<tr>
+<td>235</td>
+<td>mbind</td>
+<td>0xeb</td>
+<td>unsigned long start</td>
+<td>unsigned long len</td>
+<td>unsigned long mode</td>
+<td>const unsigned long *nmask</td>
+<td>unsigned long maxnode</td>
+<td>unsigned flags</td>
+</tr>
+<tr>
+<td>236</td>
+<td>get_mempolicy</td>
+<td>0xec</td>
+<td>int *policy</td>
+<td>unsigned long *nmask</td>
+<td>unsigned long maxnode</td>
+<td>unsigned long addr</td>
+<td>unsigned long flags</td>
+<td>-</td>
+</tr>
+<tr>
+<td>237</td>
+<td>set_mempolicy</td>
+<td>0xed</td>
+<td>int mode</td>
+<td>const unsigned long *nmask</td>
+<td>unsigned long maxnode</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>238</td>
+<td>migrate_pages</td>
+<td>0xee</td>
+<td>pid_t pid</td>
+<td>unsigned long maxnode</td>
+<td>const unsigned long *from</td>
+<td>const unsigned long *to</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>239</td>
+<td>move_pages</td>
+<td>0xef</td>
+<td>pid_t pid</td>
+<td>unsigned long nr_pages</td>
+<td>const void * *pages</td>
+<td>const int *nodes</td>
+<td>int *status</td>
+<td>int flags</td>
+</tr>
+<tr>
+<td>240</td>
+<td>rt_tgsigqueueinfo</td>
+<td>0xf0</td>
+<td>pid_t tgid</td>
+<td>pid_t pid</td>
+<td>int sig</td>
+<td>siginfo_t *uinfo</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>241</td>
+<td>perf_event_open</td>
+<td>0xf1</td>
+<td>struct perf_event_attr *attr_uptr</td>
+<td>pid_t pid</td>
+<td>int cpu</td>
+<td>int group_fd</td>
+<td>unsigned long flags</td>
+<td>-</td>
+</tr>
+<tr>
+<td>242</td>
+<td>accept4</td>
+<td>0xf2</td>
+<td>int</td>
+<td>struct sockaddr *</td>
+<td>int *</td>
+<td>int</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>243</td>
+<td>recvmmsg</td>
+<td>0xf3</td>
+<td>int fd</td>
+<td>struct mmsghdr *msg</td>
+<td>unsigned int vlen</td>
+<td>unsigned flags</td>
+<td>struct __kernel_timespec *timeout</td>
+<td>-</td>
+</tr>
+<tr>
+<td>244</td>
+<td>not implemented</td>
+<td>0xf4</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>245</td>
+<td>not implemented</td>
+<td>0xf5</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>246</td>
+<td>not implemented</td>
+<td>0xf6</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>247</td>
+<td>not implemented</td>
+<td>0xf7</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>248</td>
+<td>not implemented</td>
+<td>0xf8</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>249</td>
+<td>not implemented</td>
+<td>0xf9</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>250</td>
+<td>not implemented</td>
+<td>0xfa</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>251</td>
+<td>not implemented</td>
+<td>0xfb</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>252</td>
+<td>not implemented</td>
+<td>0xfc</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>253</td>
+<td>not implemented</td>
+<td>0xfd</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>254</td>
+<td>not implemented</td>
+<td>0xfe</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>255</td>
+<td>not implemented</td>
+<td>0xff</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>256</td>
+<td>not implemented</td>
+<td>0x100</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>257</td>
+<td>not implemented</td>
+<td>0x101</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>258</td>
+<td>not implemented</td>
+<td>0x102</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>259</td>
+<td>not implemented</td>
+<td>0x103</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>260</td>
+<td>wait4</td>
+<td>0x104</td>
+<td>pid_t pid</td>
+<td>int *stat_addr</td>
+<td>int options</td>
+<td>struct rusage *ru</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>261</td>
+<td>prlimit64</td>
+<td>0x105</td>
+<td>pid_t pid</td>
+<td>unsigned int resource</td>
+<td>const struct rlimit64 *new_rlim</td>
+<td>struct rlimit64 *old_rlim</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>262</td>
+<td>fanotify_init</td>
+<td>0x106</td>
+<td>unsigned int flags</td>
+<td>unsigned int event_f_flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>263</td>
+<td>fanotify_mark</td>
+<td>0x107</td>
+<td>int fanotify_fd</td>
+<td>unsigned int flags</td>
+<td>u64 mask</td>
+<td>int fd</td>
+<td>const char *pathname</td>
+<td>-</td>
+</tr>
+<tr>
+<td>264</td>
+<td>name_to_handle_at</td>
+<td>0x108</td>
+<td>int dfd</td>
+<td>const char *name</td>
+<td>struct file_handle *handle</td>
+<td>int *mnt_id</td>
+<td>int flag</td>
+<td>-</td>
+</tr>
+<tr>
+<td>265</td>
+<td>open_by_handle_at</td>
+<td>0x109</td>
+<td>int mountdirfd</td>
+<td>struct file_handle *handle</td>
+<td>int flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>266</td>
+<td>clock_adjtime</td>
+<td>0x10a</td>
+<td>clockid_t which_clock</td>
+<td>struct __kernel_timex *tx</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>267</td>
+<td>syncfs</td>
+<td>0x10b</td>
+<td>int fd</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>268</td>
+<td>setns</td>
+<td>0x10c</td>
+<td>int fd</td>
+<td>int nstype</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>269</td>
+<td>sendmmsg</td>
+<td>0x10d</td>
+<td>int fd</td>
+<td>struct mmsghdr *msg</td>
+<td>unsigned int vlen</td>
+<td>unsigned flags</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>270</td>
+<td>process_vm_readv</td>
+<td>0x10e</td>
+<td>pid_t pid</td>
+<td>const struct iovec *lvec</td>
+<td>unsigned long liovcnt</td>
+<td>const struct iovec *rvec</td>
+<td>unsigned long riovcnt</td>
+<td>unsigned long flags</td>
+</tr>
+<tr>
+<td>271</td>
+<td>process_vm_writev</td>
+<td>0x10f</td>
+<td>pid_t pid</td>
+<td>const struct iovec *lvec</td>
+<td>unsigned long liovcnt</td>
+<td>const struct iovec *rvec</td>
+<td>unsigned long riovcnt</td>
+<td>unsigned long flags</td>
+</tr>
+<tr>
+<td>272</td>
+<td>kcmp</td>
+<td>0x110</td>
+<td>pid_t pid1</td>
+<td>pid_t pid2</td>
+<td>int type</td>
+<td>unsigned long idx1</td>
+<td>unsigned long idx2</td>
+<td>-</td>
+</tr>
+<tr>
+<td>273</td>
+<td>finit_module</td>
+<td>0x111</td>
+<td>int fd</td>
+<td>const char *uargs</td>
+<td>int flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>274</td>
+<td>sched_setattr</td>
+<td>0x112</td>
+<td>pid_t pid</td>
+<td>struct sched_attr *attr</td>
+<td>unsigned int flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>275</td>
+<td>sched_getattr</td>
+<td>0x113</td>
+<td>pid_t pid</td>
+<td>struct sched_attr *attr</td>
+<td>unsigned int size</td>
+<td>unsigned int flags</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>276</td>
+<td>renameat2</td>
+<td>0x114</td>
+<td>int olddfd</td>
+<td>const char *oldname</td>
+<td>int newdfd</td>
+<td>const char *newname</td>
+<td>unsigned int flags</td>
+<td>-</td>
+</tr>
+<tr>
+<td>277</td>
+<td>seccomp</td>
+<td>0x115</td>
+<td>unsigned int op</td>
+<td>unsigned int flags</td>
+<td>void *uargs</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>278</td>
+<td>getrandom</td>
+<td>0x116</td>
+<td>char *buf</td>
+<td>size_t count</td>
+<td>unsigned int flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>279</td>
+<td>memfd_create</td>
+<td>0x117</td>
+<td>const char *uname_ptr</td>
+<td>unsigned int flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>280</td>
+<td>bpf</td>
+<td>0x118</td>
+<td>int cmd</td>
+<td>union bpf_attr *attr</td>
+<td>unsigned int size</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>281</td>
+<td>execveat</td>
+<td>0x119</td>
+<td>int dfd</td>
+<td>const char *filename</td>
+<td>const char *const *argv</td>
+<td>const char *const *envp</td>
+<td>int flags</td>
+<td>-</td>
+</tr>
+<tr>
+<td>282</td>
+<td>userfaultfd</td>
+<td>0x11a</td>
+<td>int flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>283</td>
+<td>membarrier</td>
+<td>0x11b</td>
+<td>int cmd</td>
+<td>unsigned int flags</td>
+<td>int cpu_id</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>284</td>
+<td>mlock2</td>
+<td>0x11c</td>
+<td>unsigned long start</td>
+<td>size_t len</td>
+<td>int flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>285</td>
+<td>copy_file_range</td>
+<td>0x11d</td>
+<td>int fd_in</td>
+<td>loff_t *off_in</td>
+<td>int fd_out</td>
+<td>loff_t *off_out</td>
+<td>size_t len</td>
+<td>unsigned int flags</td>
+</tr>
+<tr>
+<td>286</td>
+<td>preadv2</td>
+<td>0x11e</td>
+<td>unsigned long fd</td>
+<td>const struct iovec *vec</td>
+<td>unsigned long vlen</td>
+<td>unsigned long pos_l</td>
+<td>unsigned long pos_h</td>
+<td>rwf_t flags</td>
+</tr>
+<tr>
+<td>287</td>
+<td>pwritev2</td>
+<td>0x11f</td>
+<td>unsigned long fd</td>
+<td>const struct iovec *vec</td>
+<td>unsigned long vlen</td>
+<td>unsigned long pos_l</td>
+<td>unsigned long pos_h</td>
+<td>rwf_t flags</td>
+</tr>
+<tr>
+<td>288</td>
+<td>pkey_mprotect</td>
+<td>0x120</td>
+<td>unsigned long start</td>
+<td>size_t len</td>
+<td>unsigned long prot</td>
+<td>int pkey</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>289</td>
+<td>pkey_alloc</td>
+<td>0x121</td>
+<td>unsigned long flags</td>
+<td>unsigned long init_val</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>290</td>
+<td>pkey_free</td>
+<td>0x122</td>
+<td>int pkey</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>291</td>
+<td>statx</td>
+<td>0x123</td>
+<td>int dfd</td>
+<td>const char *path</td>
+<td>unsigned flags</td>
+<td>unsigned mask</td>
+<td>struct statx *buffer</td>
+<td>-</td>
+</tr>
+<tr>
+<td>425</td>
+<td>io_uring_setup</td>
+<td>0x1a9</td>
+<td>u32 entries</td>
+<td>struct io_uring_params *p</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>426</td>
+<td>io_uring_enter</td>
+<td>0x1aa</td>
+<td>unsigned int fd</td>
+<td>u32 to_submit</td>
+<td>u32 min_complete</td>
+<td>u32 flags</td>
+<td>const void *argp</td>
+<td>size_t argsz</td>
+</tr>
+<tr>
+<td>427</td>
+<td>not implemented</td>
+<td>0x1ab</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>428</td>
+<td>not implemented</td>
+<td>0x1ac</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>429</td>
+<td>not implemented</td>
+<td>0x1ad</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>430</td>
+<td>not implemented</td>
+<td>0x1ae</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>431</td>
+<td>not implemented</td>
+<td>0x1af</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>432</td>
+<td>not implemented</td>
+<td>0x1b0</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>433</td>
+<td>not implemented</td>
+<td>0x1b1</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>434</td>
+<td>not implemented</td>
+<td>0x1b2</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>435</td>
+<td>not implemented</td>
+<td>0x1b3</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>436</td>
+<td>not implemented</td>
+<td>0x1b4</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>437</td>
+<td>not implemented</td>
+<td>0x1b5</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>438</td>
+<td>not implemented</td>
+<td>0x1b6</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>439</td>
+<td>faccessat2</td>
+<td>0x1b7</td>
+<td>int dfd</td>
+<td>const char *filename</td>
+<td>int mode</td>
+<td>int flags</td>
+<td>-</td>
+<td>-</td>
+</tr>
+</tbody></table></div>
+
+        <h2 id="arm32"   >
+          <a href="#arm32" class="heading-link"><i class="fas fa-link"></i></a><a href="#arm32" class="headerlink" title="arm32"></a>arm32</h2>
+      <div class="table-container"><table>
+<thead>
+<tr>
+<th>NR</th>
+<th>syscall name</th>
+<th>%r7</th>
+<th>arg0(%r0)</th>
+<th>arg1(%r1)</th>
+<th>arg2(%r2)</th>
+<th>arg3(%r3)</th>
+<th>arg4(%r4)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>restart_syscall</td>
+<td>0x00</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>1</td>
+<td>exit</td>
+<td>0x01</td>
+<td>int error_code</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>2</td>
+<td>fork</td>
+<td>0x02</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>3</td>
+<td>read</td>
+<td>0x03</td>
+<td>unsigned int fd</td>
+<td>char *buf</td>
+<td>size_t count</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>4</td>
+<td>write</td>
+<td>0x04</td>
+<td>unsigned int fd</td>
+<td>const char *buf</td>
+<td>size_t count</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>5</td>
+<td>open</td>
+<td>0x05</td>
+<td>const char *filename</td>
+<td>int flags</td>
+<td>umode_t mode</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>6</td>
+<td>close</td>
+<td>0x06</td>
+<td>unsigned int fd</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>7</td>
+<td>not implemented</td>
+<td>0x07</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>8</td>
+<td>creat</td>
+<td>0x08</td>
+<td>const char *pathname</td>
+<td>umode_t mode</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>9</td>
+<td>link</td>
+<td>0x09</td>
+<td>const char *oldname</td>
+<td>const char *newname</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>10</td>
+<td>unlink</td>
+<td>0x0a</td>
+<td>const char *pathname</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>11</td>
+<td>execve</td>
+<td>0x0b</td>
+<td>const char *filename</td>
+<td>const char *const *argv</td>
+<td>const char *const *envp</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>12</td>
+<td>chdir</td>
+<td>0x0c</td>
+<td>const char *filename</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>13</td>
+<td>not implemented</td>
+<td>0x0d</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>14</td>
+<td>mknod</td>
+<td>0x0e</td>
+<td>const char *filename</td>
+<td>umode_t mode</td>
+<td>unsigned dev</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>15</td>
+<td>chmod</td>
+<td>0x0f</td>
+<td>const char *filename</td>
+<td>umode_t mode</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>16</td>
+<td>lchown</td>
+<td>0x10</td>
+<td>const char *filename</td>
+<td>uid_t user</td>
+<td>gid_t group</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>17</td>
+<td>not implemented</td>
+<td>0x11</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>18</td>
+<td>not implemented</td>
+<td>0x12</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>19</td>
+<td>lseek</td>
+<td>0x13</td>
+<td>unsigned int fd</td>
+<td>off_t offset</td>
+<td>unsigned int whence</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>20</td>
+<td>getpid</td>
+<td>0x14</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>21</td>
+<td>mount</td>
+<td>0x15</td>
+<td>char *dev_name</td>
+<td>char *dir_name</td>
+<td>char *type</td>
+<td>unsigned long flags</td>
+<td>void *data</td>
+</tr>
+<tr>
+<td>22</td>
+<td>not implemented</td>
+<td>0x16</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>23</td>
+<td>setuid</td>
+<td>0x17</td>
+<td>uid_t uid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>24</td>
+<td>getuid</td>
+<td>0x18</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>25</td>
+<td>not implemented</td>
+<td>0x19</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>26</td>
+<td>ptrace</td>
+<td>0x1a</td>
+<td>long request</td>
+<td>long pid</td>
+<td>unsigned long addr</td>
+<td>unsigned long data</td>
+<td>-</td>
+</tr>
+<tr>
+<td>27</td>
+<td>not implemented</td>
+<td>0x1b</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>28</td>
+<td>not implemented</td>
+<td>0x1c</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>29</td>
+<td>pause</td>
+<td>0x1d</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>30</td>
+<td>not implemented</td>
+<td>0x1e</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>31</td>
+<td>not implemented</td>
+<td>0x1f</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>32</td>
+<td>not implemented</td>
+<td>0x20</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>33</td>
+<td>access</td>
+<td>0x21</td>
+<td>const char *filename</td>
+<td>int mode</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>34</td>
+<td>nice</td>
+<td>0x22</td>
+<td>int increment</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>35</td>
+<td>not implemented</td>
+<td>0x23</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>36</td>
+<td>sync</td>
+<td>0x24</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>37</td>
+<td>kill</td>
+<td>0x25</td>
+<td>pid_t pid</td>
+<td>int sig</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>38</td>
+<td>rename</td>
+<td>0x26</td>
+<td>const char *oldname</td>
+<td>const char *newname</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>39</td>
+<td>mkdir</td>
+<td>0x27</td>
+<td>const char *pathname</td>
+<td>umode_t mode</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>40</td>
+<td>rmdir</td>
+<td>0x28</td>
+<td>const char *pathname</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>41</td>
+<td>dup</td>
+<td>0x29</td>
+<td>unsigned int fildes</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>42</td>
+<td>pipe</td>
+<td>0x2a</td>
+<td>int *fildes</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>43</td>
+<td>times</td>
+<td>0x2b</td>
+<td>struct tms *tbuf</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>44</td>
+<td>not implemented</td>
+<td>0x2c</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>45</td>
+<td>brk</td>
+<td>0x2d</td>
+<td>unsigned long brk</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>46</td>
+<td>setgid</td>
+<td>0x2e</td>
+<td>gid_t gid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>47</td>
+<td>getgid</td>
+<td>0x2f</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>48</td>
+<td>not implemented</td>
+<td>0x30</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>49</td>
+<td>geteuid</td>
+<td>0x31</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>50</td>
+<td>getegid</td>
+<td>0x32</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>51</td>
+<td>acct</td>
+<td>0x33</td>
+<td>const char *name</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>52</td>
+<td>umount2</td>
+<td>0x34</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>53</td>
+<td>not implemented</td>
+<td>0x35</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>54</td>
+<td>ioctl</td>
+<td>0x36</td>
+<td>unsigned int fd</td>
+<td>unsigned int cmd</td>
+<td>unsigned long arg</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>55</td>
+<td>fcntl</td>
+<td>0x37</td>
+<td>unsigned int fd</td>
+<td>unsigned int cmd</td>
+<td>unsigned long arg</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>56</td>
+<td>not implemented</td>
+<td>0x38</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>57</td>
+<td>setpgid</td>
+<td>0x39</td>
+<td>pid_t pid</td>
+<td>pid_t pgid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>58</td>
+<td>not implemented</td>
+<td>0x3a</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>59</td>
+<td>not implemented</td>
+<td>0x3b</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>60</td>
+<td>umask</td>
+<td>0x3c</td>
+<td>int mask</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>61</td>
+<td>chroot</td>
+<td>0x3d</td>
+<td>const char *filename</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>62</td>
+<td>ustat</td>
+<td>0x3e</td>
+<td>unsigned dev</td>
+<td>struct ustat *ubuf</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>63</td>
+<td>dup2</td>
+<td>0x3f</td>
+<td>unsigned int oldfd</td>
+<td>unsigned int newfd</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>64</td>
+<td>getppid</td>
+<td>0x40</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>65</td>
+<td>getpgrp</td>
+<td>0x41</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>66</td>
+<td>setsid</td>
+<td>0x42</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>67</td>
+<td>sigaction</td>
+<td>0x43</td>
+<td>int</td>
+<td>const struct old_sigaction *</td>
+<td>struct old_sigaction *</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>68</td>
+<td>not implemented</td>
+<td>0x44</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>69</td>
+<td>not implemented</td>
+<td>0x45</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>70</td>
+<td>setreuid</td>
+<td>0x46</td>
+<td>uid_t ruid</td>
+<td>uid_t euid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>71</td>
+<td>setregid</td>
+<td>0x47</td>
+<td>gid_t rgid</td>
+<td>gid_t egid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>72</td>
+<td>sigsuspend</td>
+<td>0x48</td>
+<td>int unused1</td>
+<td>int unused2</td>
+<td>old_sigset_t mask</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>73</td>
+<td>sigpending</td>
+<td>0x49</td>
+<td>old_sigset_t *uset</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>74</td>
+<td>sethostname</td>
+<td>0x4a</td>
+<td>char *name</td>
+<td>int len</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>75</td>
+<td>setrlimit</td>
+<td>0x4b</td>
+<td>unsigned int resource</td>
+<td>struct rlimit *rlim</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>76</td>
+<td>not implemented</td>
+<td>0x4c</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>77</td>
+<td>getrusage</td>
+<td>0x4d</td>
+<td>int who</td>
+<td>struct rusage *ru</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>78</td>
+<td>gettimeofday</td>
+<td>0x4e</td>
+<td>struct __kernel_old_timeval *tv</td>
+<td>struct timezone *tz</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>79</td>
+<td>settimeofday</td>
+<td>0x4f</td>
+<td>struct __kernel_old_timeval *tv</td>
+<td>struct timezone *tz</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>80</td>
+<td>getgroups</td>
+<td>0x50</td>
+<td>int gidsetsize</td>
+<td>gid_t *grouplist</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>81</td>
+<td>setgroups</td>
+<td>0x51</td>
+<td>int gidsetsize</td>
+<td>gid_t *grouplist</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>82</td>
+<td>not implemented</td>
+<td>0x52</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>83</td>
+<td>symlink</td>
+<td>0x53</td>
+<td>const char *old</td>
+<td>const char *new</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>84</td>
+<td>not implemented</td>
+<td>0x54</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>85</td>
+<td>readlink</td>
+<td>0x55</td>
+<td>const char *path</td>
+<td>char *buf</td>
+<td>int bufsiz</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>86</td>
+<td>uselib</td>
+<td>0x56</td>
+<td>const char *library</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>87</td>
+<td>swapon</td>
+<td>0x57</td>
+<td>const char *specialfile</td>
+<td>int swap_flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>88</td>
+<td>reboot</td>
+<td>0x58</td>
+<td>int magic1</td>
+<td>int magic2</td>
+<td>unsigned int cmd</td>
+<td>void *arg</td>
+<td>-</td>
+</tr>
+<tr>
+<td>89</td>
+<td>not implemented</td>
+<td>0x59</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>90</td>
+<td>not implemented</td>
+<td>0x5a</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>91</td>
+<td>munmap</td>
+<td>0x5b</td>
+<td>unsigned long addr</td>
+<td>size_t len</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>92</td>
+<td>truncate</td>
+<td>0x5c</td>
+<td>const char *path</td>
+<td>long length</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>93</td>
+<td>ftruncate</td>
+<td>0x5d</td>
+<td>unsigned int fd</td>
+<td>unsigned long length</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>94</td>
+<td>fchmod</td>
+<td>0x5e</td>
+<td>unsigned int fd</td>
+<td>umode_t mode</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>95</td>
+<td>fchown</td>
+<td>0x5f</td>
+<td>unsigned int fd</td>
+<td>uid_t user</td>
+<td>gid_t group</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>96</td>
+<td>getpriority</td>
+<td>0x60</td>
+<td>int which</td>
+<td>int who</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>97</td>
+<td>setpriority</td>
+<td>0x61</td>
+<td>int which</td>
+<td>int who</td>
+<td>int niceval</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>98</td>
+<td>not implemented</td>
+<td>0x62</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>99</td>
+<td>statfs</td>
+<td>0x63</td>
+<td>const char * path</td>
+<td>struct statfs *buf</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>100</td>
+<td>fstatfs</td>
+<td>0x64</td>
+<td>unsigned int fd</td>
+<td>struct statfs *buf</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>101</td>
+<td>not implemented</td>
+<td>0x65</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>102</td>
+<td>not implemented</td>
+<td>0x66</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>103</td>
+<td>syslog</td>
+<td>0x67</td>
+<td>int type</td>
+<td>char *buf</td>
+<td>int len</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>104</td>
+<td>setitimer</td>
+<td>0x68</td>
+<td>int which</td>
+<td>struct __kernel_old_itimerval *value</td>
+<td>struct __kernel_old_itimerval *ovalue</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>105</td>
+<td>getitimer</td>
+<td>0x69</td>
+<td>int which</td>
+<td>struct __kernel_old_itimerval *value</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>106</td>
+<td>stat</td>
+<td>0x6a</td>
+<td>const char *filename</td>
+<td>struct __old_kernel_stat *statbuf</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>107</td>
+<td>lstat</td>
+<td>0x6b</td>
+<td>const char *filename</td>
+<td>struct __old_kernel_stat *statbuf</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>108</td>
+<td>fstat</td>
+<td>0x6c</td>
+<td>unsigned int fd</td>
+<td>struct __old_kernel_stat *statbuf</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>109</td>
+<td>not implemented</td>
+<td>0x6d</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>110</td>
+<td>not implemented</td>
+<td>0x6e</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>111</td>
+<td>vhangup</td>
+<td>0x6f</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>112</td>
+<td>not implemented</td>
+<td>0x70</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>113</td>
+<td>not implemented</td>
+<td>0x71</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>114</td>
+<td>wait4</td>
+<td>0x72</td>
+<td>pid_t pid</td>
+<td>int *stat_addr</td>
+<td>int options</td>
+<td>struct rusage *ru</td>
+<td>-</td>
+</tr>
+<tr>
+<td>115</td>
+<td>swapoff</td>
+<td>0x73</td>
+<td>const char *specialfile</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>116</td>
+<td>sysinfo</td>
+<td>0x74</td>
+<td>struct sysinfo *info</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>117</td>
+<td>not implemented</td>
+<td>0x75</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>118</td>
+<td>fsync</td>
+<td>0x76</td>
+<td>unsigned int fd</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>119</td>
+<td>sigreturn</td>
+<td>0x77</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>120</td>
+<td>clone</td>
+<td>0x78</td>
+<td>unsigned long</td>
+<td>unsigned long</td>
+<td>int *</td>
+<td>int *</td>
+<td>unsigned long</td>
+</tr>
+<tr>
+<td>121</td>
+<td>setdomainname</td>
+<td>0x79</td>
+<td>char *name</td>
+<td>int len</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>122</td>
+<td>uname</td>
+<td>0x7a</td>
+<td>struct old_utsname *</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>123</td>
+<td>not implemented</td>
+<td>0x7b</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>124</td>
+<td>adjtimex</td>
+<td>0x7c</td>
+<td>struct __kernel_timex *txc_p</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>125</td>
+<td>mprotect</td>
+<td>0x7d</td>
+<td>unsigned long start</td>
+<td>size_t len</td>
+<td>unsigned long prot</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>126</td>
+<td>sigprocmask</td>
+<td>0x7e</td>
+<td>int how</td>
+<td>old_sigset_t *set</td>
+<td>old_sigset_t *oset</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>127</td>
+<td>not implemented</td>
+<td>0x7f</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>128</td>
+<td>init_module</td>
+<td>0x80</td>
+<td>void *umod</td>
+<td>unsigned long len</td>
+<td>const char *uargs</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>129</td>
+<td>delete_module</td>
+<td>0x81</td>
+<td>const char *name_user</td>
+<td>unsigned int flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>130</td>
+<td>not implemented</td>
+<td>0x82</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>131</td>
+<td>quotactl</td>
+<td>0x83</td>
+<td>unsigned int cmd</td>
+<td>const char *special</td>
+<td>qid_t id</td>
+<td>void *addr</td>
+<td>-</td>
+</tr>
+<tr>
+<td>132</td>
+<td>getpgid</td>
+<td>0x84</td>
+<td>pid_t pid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>133</td>
+<td>fchdir</td>
+<td>0x85</td>
+<td>unsigned int fd</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>134</td>
+<td>bdflush</td>
+<td>0x86</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>135</td>
+<td>sysfs</td>
+<td>0x87</td>
+<td>int option</td>
+<td>unsigned long arg1</td>
+<td>unsigned long arg2</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>136</td>
+<td>personality</td>
+<td>0x88</td>
+<td>unsigned int personality</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>137</td>
+<td>not implemented</td>
+<td>0x89</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>138</td>
+<td>setfsuid</td>
+<td>0x8a</td>
+<td>uid_t uid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>139</td>
+<td>setfsgid</td>
+<td>0x8b</td>
+<td>gid_t gid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>140</td>
+<td>_llseek</td>
+<td>0x8c</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>141</td>
+<td>getdents</td>
+<td>0x8d</td>
+<td>unsigned int fd</td>
+<td>struct linux_dirent *dirent</td>
+<td>unsigned int count</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>142</td>
+<td>_newselect</td>
+<td>0x8e</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>143</td>
+<td>flock</td>
+<td>0x8f</td>
+<td>unsigned int fd</td>
+<td>unsigned int cmd</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>144</td>
+<td>msync</td>
+<td>0x90</td>
+<td>unsigned long start</td>
+<td>size_t len</td>
+<td>int flags</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>145</td>
+<td>readv</td>
+<td>0x91</td>
+<td>unsigned long fd</td>
+<td>const struct iovec *vec</td>
+<td>unsigned long vlen</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>146</td>
+<td>writev</td>
+<td>0x92</td>
+<td>unsigned long fd</td>
+<td>const struct iovec *vec</td>
+<td>unsigned long vlen</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>147</td>
+<td>getsid</td>
+<td>0x93</td>
+<td>pid_t pid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>148</td>
+<td>fdatasync</td>
+<td>0x94</td>
+<td>unsigned int fd</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>149</td>
+<td>_sysctl</td>
+<td>0x95</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>150</td>
+<td>mlock</td>
+<td>0x96</td>
+<td>unsigned long start</td>
+<td>size_t len</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>151</td>
+<td>munlock</td>
+<td>0x97</td>
+<td>unsigned long start</td>
+<td>size_t len</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>152</td>
+<td>mlockall</td>
+<td>0x98</td>
+<td>int flags</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>153</td>
+<td>munlockall</td>
+<td>0x99</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>154</td>
+<td>sched_setparam</td>
+<td>0x9a</td>
+<td>pid_t pid</td>
+<td>struct sched_param *param</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>155</td>
+<td>sched_getparam</td>
+<td>0x9b</td>
+<td>pid_t pid</td>
+<td>struct sched_param *param</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>156</td>
+<td>sched_setscheduler</td>
+<td>0x9c</td>
+<td>pid_t pid</td>
+<td>int policy</td>
+<td>struct sched_param *param</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>157</td>
+<td>sched_getscheduler</td>
+<td>0x9d</td>
+<td>pid_t pid</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>158</td>
+<td>sched_yield</td>
+<td>0x9e</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>159</td>
+<td>sched_get_priority_max</td>
+<td>0x9f</td>
+<td>int policy</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>160</td>
+<td>sched_get_priority_min</td>
+<td>0xa0</td>
+<td>int policy</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>161</td>
+<td>sched_rr_get_interval</td>
+<td>0xa1</td>
+<td>pid_t pid</td>
+<td>struct __kernel_timespec *interval</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>162</td>
+<td>nanosleep</td>
+<td>0xa2</td>
+<td>struct __kernel_timespec *rqtp</td>
+<td>struct __kernel_timespec *rmtp</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>163</td>
+<td>mremap</td>
+<td>0xa3</td>
+<td>unsigned long addr</td>
+<td>unsigned long old_len</td>
+<td>unsigned long new_len</td>
+<td>unsigned long flags</td>
+<td>unsigned long new_addr</td>
+</tr>
+<tr>
+<td>164</td>
+<td>setresuid</td>
+<td>0xa4</td>
+<td>uid_t ruid</td>
+<td>uid_t euid</td>
+<td>uid_t suid</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>165</td>
+<td>getresuid</td>
+<td>0xa5</td>
+<td>uid_t *ruid</td>
+<td>uid_t *euid</td>
+<td>uid_t *suid</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>166</td>
+<td>not implemented</td>
+<td>0xa6</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>167</td>
+<td>not implemented</td>
+<td>0xa7</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>168</td>
+<td>poll</td>
+<td>0xa8</td>
+<td>struct pollfd *ufds</td>
+<td>unsigned int nfds</td>
+<td>int timeout</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>169</td>
+<td>nfsservctl</td>
+<td>0xa9</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>170</td>
+<td>setresgid</td>
+<td>0xaa</td>
+<td>gid_t rgid</td>
+<td>gid_t egid</td>
+<td>gid_t sgid</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>171</td>
+<td>getresgid</td>
+<td>0xab</td>
+<td>gid_t *rgid</td>
+<td>gid_t *egid</td>
+<td>gid_t *sgid</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>172</td>
+<td>prctl</td>
+<td>0xac</td>
+<td>int option</td>
+<td>unsigned long arg2</td>
+<td>unsigned long arg3</td>
+<td>unsigned long arg4</td>
+<td>unsigned long arg5</td>
+</tr>
+<tr>
+<td>173</td>
+<td>rt_sigreturn</td>
+<td>0xad</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>174</td>
+<td>rt_sigaction</td>
+<td>0xae</td>
+<td>int</td>
+<td>const struct sigaction *</td>
+<td>struct sigaction *</td>
+<td>size_t</td>
+<td>-</td>
+</tr>
+<tr>
+<td>175</td>
+<td>rt_sigprocmask</td>
+<td>0xaf</td>
+<td>int how</td>
+<td>sigset_t *set</td>
+<td>sigset_t *oset</td>
+<td>size_t sigsetsize</td>
+<td>-</td>
+</tr>
+<tr>
+<td>176</td>
+<td>rt_sigpending</td>
+<td>0xb0</td>
+<td>sigset_t *set</td>
+<td>size_t sigsetsize</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>177</td>
+<td>rt_sigtimedwait</td>
+<td>0xb1</td>
+<td>const sigset_t *uthese</td>
+<td>siginfo_t *uinfo</td>
+<td>const struct __kernel_timespec *uts</td>
+<td>size_t sigsetsize</td>
+<td>-</td>
+</tr>
+<tr>
+<td>178</td>
+<td>rt_sigqueueinfo</td>
+<td>0xb2</td>
+<td>pid_t pid</td>
+<td>int sig</td>
+<td>siginfo_t *uinfo</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>179</td>
+<td>rt_sigsuspend</td>
+<td>0xb3</td>
+<td>sigset_t *unewset</td>
+<td>size_t sigsetsize</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>180</td>
+<td>pread64</td>
+<td>0xb4</td>
+<td>unsigned int fd</td>
+<td>char *buf</td>
+<td>size_t count</td>
+<td>loff_t pos</td>
+<td>-</td>
+</tr>
+<tr>
+<td>181</td>
+<td>pwrite64</td>
+<td>0xb5</td>
+<td>unsigned int fd</td>
+<td>const char *buf</td>
+<td>size_t count</td>
+<td>loff_t pos</td>
+<td>-</td>
+</tr>
+<tr>
+<td>182</td>
+<td>chown</td>
+<td>0xb6</td>
+<td>const char *filename</td>
+<td>uid_t user</td>
+<td>gid_t group</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>183</td>
+<td>getcwd</td>
+<td>0xb7</td>
+<td>char *buf</td>
+<td>unsigned long size</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>184</td>
+<td>capget</td>
+<td>0xb8</td>
+<td>cap_user_header_t header</td>
+<td>cap_user_data_t dataptr</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>185</td>
+<td>capset</td>
+<td>0xb9</td>
+<td>cap_user_header_t header</td>
+<td>const cap_user_data_t data</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>186</td>
+<td>sigaltstack</td>
+<td>0xba</td>
+<td>const struct sigaltstack *uss</td>
+<td>struct sigaltstack *uoss</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>187</td>
+<td>sendfile</td>
+<td>0xbb</td>
+<td>int out_fd</td>
+<td>int in_fd</td>
+<td>off_t *offset</td>
+<td>size_t count</td>
+<td>-</td>
+</tr>
+<tr>
+<td>188</td>
+<td>not implemented</td>
+<td>0xbc</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>189</td>
+<td>not implemented</td>
+<td>0xbd</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>190</td>
+<td>vfork</td>
+<td>0xbe</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>191</td>
+<td>ugetrlimit</td>
+<td>0xbf</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>192</td>
+<td>mmap2</td>
+<td>0xc0</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>193</td>
+<td>truncate64</td>
+<td>0xc1</td>
+<td>const char *path</td>
+<td>loff_t length</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>194</td>
+<td>ftruncate64</td>
+<td>0xc2</td>
+<td>unsigned int fd</td>
+<td>loff_t length</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>195</td>
+<td>stat64</td>
+<td>0xc3</td>
+<td>const char *filename</td>
+<td>struct stat64 *statbuf</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>196</td>
+<td>lstat64</td>
+<td>0xc4</td>
+<td>const char *filename</td>
+<td>struct stat64 *statbuf</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>197</td>
+<td>fstat64</td>
+<td>0xc5</td>
+<td>unsigned long fd</td>
+<td>struct stat64 *statbuf</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>198</td>
+<td>lchown32</td>
+<td>0xc6</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>199</td>
+<td>getuid32</td>
+<td>0xc7</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>200</td>
+<td>getgid32</td>
+<td>0xc8</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>201</td>
+<td>geteuid32</td>
+<td>0xc9</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>202</td>
+<td>getegid32</td>
+<td>0xca</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>203</td>
+<td>setreuid32</td>
+<td>0xcb</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>204</td>
+<td>setregid32</td>
+<td>0xcc</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>205</td>
+<td>getgroups32</td>
+<td>0xcd</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>206</td>
+<td>setgroups32</td>
+<td>0xce</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>207</td>
+<td>fchown32</td>
+<td>0xcf</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>208</td>
+<td>setresuid32</td>
+<td>0xd0</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>209</td>
+<td>getresuid32</td>
+<td>0xd1</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>210</td>
+<td>setresgid32</td>
+<td>0xd2</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>211</td>
+<td>getresgid32</td>
+<td>0xd3</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>212</td>
+<td>chown32</td>
+<td>0xd4</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>213</td>
+<td>setuid32</td>
+<td>0xd5</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>214</td>
+<td>setgid32</td>
+<td>0xd6</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>215</td>
+<td>setfsuid32</td>
+<td>0xd7</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>216</td>
+<td>setfsgid32</td>
+<td>0xd8</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>217</td>
+<td>getdents64</td>
+<td>0xd9</td>
+<td>unsigned int fd</td>
+<td>struct linux_dirent64 *dirent</td>
+<td>unsigned int count</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>218</td>
+<td>pivot_root</td>
+<td>0xda</td>
+<td>const char *new_root</td>
+<td>const char *put_old</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>219</td>
+<td>mincore</td>
+<td>0xdb</td>
+<td>unsigned long start</td>
+<td>size_t len</td>
+<td>unsigned char * vec</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>220</td>
+<td>madvise</td>
+<td>0xdc</td>
+<td>unsigned long start</td>
+<td>size_t len</td>
+<td>int behavior</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>221</td>
+<td>fcntl64</td>
+<td>0xdd</td>
+<td>unsigned int fd</td>
+<td>unsigned int cmd</td>
+<td>unsigned long arg</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>222</td>
+<td>not implemented</td>
+<td>0xde</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>223</td>
+<td>not implemented</td>
+<td>0xdf</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>224</td>
+<td>gettid</td>
+<td>0xe0</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>225</td>
+<td>readahead</td>
+<td>0xe1</td>
+<td>int fd</td>
+<td>loff_t offset</td>
+<td>size_t count</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>226</td>
+<td>setxattr</td>
+<td>0xe2</td>
+<td>const char *path</td>
+<td>const char *name</td>
+<td>const void *value</td>
+<td>size_t size</td>
+<td>int flags</td>
+</tr>
+<tr>
+<td>227</td>
+<td>lsetxattr</td>
+<td>0xe3</td>
+<td>const char *path</td>
+<td>const char *name</td>
+<td>const void *value</td>
+<td>size_t size</td>
+<td>int flags</td>
+</tr>
+<tr>
+<td>228</td>
+<td>fsetxattr</td>
+<td>0xe4</td>
+<td>int fd</td>
+<td>const char *name</td>
+<td>const void *value</td>
+<td>size_t size</td>
+<td>int flags</td>
+</tr>
+<tr>
+<td>229</td>
+<td>getxattr</td>
+<td>0xe5</td>
+<td>const char *path</td>
+<td>const char *name</td>
+<td>void *value</td>
+<td>size_t size</td>
+<td>-</td>
+</tr>
+<tr>
+<td>230</td>
+<td>lgetxattr</td>
+<td>0xe6</td>
+<td>const char *path</td>
+<td>const char *name</td>
+<td>void *value</td>
+<td>size_t size</td>
+<td>-</td>
+</tr>
+<tr>
+<td>231</td>
+<td>fgetxattr</td>
+<td>0xe7</td>
+<td>int fd</td>
+<td>const char *name</td>
+<td>void *value</td>
+<td>size_t size</td>
+<td>-</td>
+</tr>
+<tr>
+<td>232</td>
+<td>listxattr</td>
+<td>0xe8</td>
+<td>const char *path</td>
+<td>char *list</td>
+<td>size_t size</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>233</td>
+<td>llistxattr</td>
+<td>0xe9</td>
+<td>const char *path</td>
+<td>char *list</td>
+<td>size_t size</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>234</td>
+<td>flistxattr</td>
+<td>0xea</td>
+<td>int fd</td>
+<td>char *list</td>
+<td>size_t size</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>235</td>
+<td>removexattr</td>
+<td>0xeb</td>
+<td>const char *path</td>
+<td>const char *name</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>236</td>
+<td>lremovexattr</td>
+<td>0xec</td>
+<td>const char *path</td>
+<td>const char *name</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>237</td>
+<td>fremovexattr</td>
+<td>0xed</td>
+<td>int fd</td>
+<td>const char *name</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>238</td>
+<td>tkill</td>
+<td>0xee</td>
+<td>pid_t pid</td>
+<td>int sig</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>239</td>
+<td>sendfile64</td>
+<td>0xef</td>
+<td>int out_fd</td>
+<td>int in_fd</td>
+<td>loff_t *offset</td>
+<td>size_t count</td>
+<td>-</td>
+</tr>
+<tr>
+<td>240</td>
+<td>futex</td>
+<td>0xf0</td>
+<td>u32 *uaddr</td>
+<td>int op</td>
+<td>u32 val</td>
+<td>const struct __kernel_timespec *utime</td>
+<td>u32 *uaddr2</td>
+</tr>
+<tr>
+<td>241</td>
+<td>sched_setaffinity</td>
+<td>0xf1</td>
+<td>pid_t pid</td>
+<td>unsigned int len</td>
+<td>unsigned long *user_mask_ptr</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>242</td>
+<td>sched_getaffinity</td>
+<td>0xf2</td>
+<td>pid_t pid</td>
+<td>unsigned int len</td>
+<td>unsigned long *user_mask_ptr</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>243</td>
+<td>io_setup</td>
+<td>0xf3</td>
+<td>unsigned nr_reqs</td>
+<td>aio_context_t *ctx</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>244</td>
+<td>io_destroy</td>
+<td>0xf4</td>
+<td>aio_context_t ctx</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>245</td>
+<td>io_getevents</td>
+<td>0xf5</td>
+<td>aio_context_t ctx_id</td>
+<td>long min_nr</td>
+<td>long nr</td>
+<td>struct io_event *events</td>
+<td>struct __kernel_timespec *timeout</td>
+</tr>
+<tr>
+<td>246</td>
+<td>io_submit</td>
+<td>0xf6</td>
+<td>aio_context_t</td>
+<td>long</td>
+<td>struct iocb * *</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>247</td>
+<td>io_cancel</td>
+<td>0xf7</td>
+<td>aio_context_t ctx_id</td>
+<td>struct iocb *iocb</td>
+<td>struct io_event *result</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>248</td>
+<td>exit_group</td>
+<td>0xf8</td>
+<td>int error_code</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>249</td>
+<td>lookup_dcookie</td>
+<td>0xf9</td>
+<td>u64 cookie64</td>
+<td>char *buf</td>
+<td>size_t len</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>250</td>
+<td>epoll_create</td>
+<td>0xfa</td>
+<td>int size</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>251</td>
+<td>epoll_ctl</td>
+<td>0xfb</td>
+<td>int epfd</td>
+<td>int op</td>
+<td>int fd</td>
+<td>struct epoll_event *event</td>
+<td>-</td>
+</tr>
+<tr>
+<td>252</td>
+<td>epoll_wait</td>
+<td>0xfc</td>
+<td>int epfd</td>
+<td>struct epoll_event *events</td>
+<td>int maxevents</td>
+<td>int timeout</td>
+<td>-</td>
+</tr>
+<tr>
+<td>253</td>
+<td>remap_file_pages</td>
+<td>0xfd</td>
+<td>unsigned long start</td>
+<td>unsigned long size</td>
+<td>unsigned long prot</td>
+<td>unsigned long pgoff</td>
+<td>unsigned long flags</td>
+</tr>
+<tr>
+<td>254</td>
+<td>not implemented</td>
+<td>0xfe</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>255</td>
+<td>not implemented</td>
+<td>0xff</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>256</td>
+<td>set_tid_address</td>
+<td>0x100</td>
+<td>int *tidptr</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>257</td>
+<td>timer_create</td>
+<td>0x101</td>
+<td>clockid_t which_clock</td>
+<td>struct sigevent *timer_event_spec</td>
+<td>timer_t * created_timer_id</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>258</td>
+<td>timer_settime</td>
+<td>0x102</td>
+<td>timer_t timer_id</td>
+<td>int flags</td>
+<td>const struct __kernel_itimerspec *new_setting</td>
+<td>struct __kernel_itimerspec *old_setting</td>
+<td>-</td>
+</tr>
+<tr>
+<td>259</td>
+<td>timer_gettime</td>
+<td>0x103</td>
+<td>timer_t timer_id</td>
+<td>struct __kernel_itimerspec *setting</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>260</td>
+<td>timer_getoverrun</td>
+<td>0x104</td>
+<td>timer_t timer_id</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>261</td>
+<td>timer_delete</td>
+<td>0x105</td>
+<td>timer_t timer_id</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>262</td>
+<td>clock_settime</td>
+<td>0x106</td>
+<td>clockid_t which_clock</td>
+<td>const struct __kernel_timespec *tp</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>263</td>
+<td>clock_gettime</td>
+<td>0x107</td>
+<td>clockid_t which_clock</td>
+<td>struct __kernel_timespec *tp</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>264</td>
+<td>clock_getres</td>
+<td>0x108</td>
+<td>clockid_t which_clock</td>
+<td>struct __kernel_timespec *tp</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>265</td>
+<td>clock_nanosleep</td>
+<td>0x109</td>
+<td>clockid_t which_clock</td>
+<td>int flags</td>
+<td>const struct __kernel_timespec *rqtp</td>
+<td>struct __kernel_timespec *rmtp</td>
+<td>-</td>
+</tr>
+<tr>
+<td>266</td>
+<td>statfs64</td>
+<td>0x10a</td>
+<td>const char *path</td>
+<td>size_t sz</td>
+<td>struct statfs64 *buf</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>267</td>
+<td>fstatfs64</td>
+<td>0x10b</td>
+<td>unsigned int fd</td>
+<td>size_t sz</td>
+<td>struct statfs64 *buf</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>268</td>
+<td>tgkill</td>
+<td>0x10c</td>
+<td>pid_t tgid</td>
+<td>pid_t pid</td>
+<td>int sig</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>269</td>
+<td>utimes</td>
+<td>0x10d</td>
+<td>char *filename</td>
+<td>struct __kernel_old_timeval *utimes</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>270</td>
+<td>arm_fadvise64_64</td>
+<td>0x10e</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+</tr>
+<tr>
+<td>271</td>
+<td>pciconfig_iobase</td>
+<td>0x10f</td>
+<td>long which</td>
+<td>unsigned long bus</td>
+<td>unsigned long devfn</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>272</td>
+<td>pciconfig_read</td>
+<td>0x110</td>
+<td>unsigned long bus</td>
+<td>unsigned long dfn</td>
+<td>unsigned long off</td>
+<td>unsigned long len</td>
+<td>void *buf</td>
+</tr>
+<tr>
+<td>273</td>
+<td>pciconfig_write</td>
+<td>0x111</td>
+<td>unsigned long bus</td>
+<td>unsigned long dfn</td>
+<td>unsigned long off</td>
+<td>unsigned long len</td>
+<td>void *buf</td>
+</tr>
+<tr>
+<td>274</td>
+<td>mq_open</td>
+<td>0x112</td>
+<td>const char *name</td>
+<td>int oflag</td>
+<td>umode_t mode</td>
+<td>struct mq_attr *attr</td>
+<td>-</td>
+</tr>
+<tr>
+<td>275</td>
+<td>mq_unlink</td>
+<td>0x113</td>
+<td>const char *name</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>276</td>
+<td>mq_timedsend</td>
+<td>0x114</td>
+<td>mqd_t mqdes</td>
+<td>const char *msg_ptr</td>
+<td>size_t msg_len</td>
+<td>unsigned int msg_prio</td>
+<td>const struct __kernel_timespec *abs_timeout</td>
+</tr>
+<tr>
+<td>277</td>
+<td>mq_timedreceive</td>
+<td>0x115</td>
+<td>mqd_t mqdes</td>
+<td>char *msg_ptr</td>
+<td>size_t msg_len</td>
+<td>unsigned int *msg_prio</td>
+<td>const struct __kernel_timespec *abs_timeout</td>
+</tr>
+<tr>
+<td>278</td>
+<td>mq_notify</td>
+<td>0x116</td>
+<td>mqd_t mqdes</td>
+<td>const struct sigevent *notification</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>279</td>
+<td>mq_getsetattr</td>
+<td>0x117</td>
+<td>mqd_t mqdes</td>
+<td>const struct mq_attr *mqstat</td>
+<td>struct mq_attr *omqstat</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>280</td>
+<td>waitid</td>
+<td>0x118</td>
+<td>int which</td>
+<td>pid_t pid</td>
+<td>struct siginfo *infop</td>
+<td>int options</td>
+<td>struct rusage *ru</td>
+</tr>
+<tr>
+<td>281</td>
+<td>socket</td>
+<td>0x119</td>
+<td>int</td>
+<td>int</td>
+<td>int</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>282</td>
+<td>bind</td>
+<td>0x11a</td>
+<td>int</td>
+<td>struct sockaddr *</td>
+<td>int</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>283</td>
+<td>connect</td>
+<td>0x11b</td>
+<td>int</td>
+<td>struct sockaddr *</td>
+<td>int</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>284</td>
+<td>listen</td>
+<td>0x11c</td>
+<td>int</td>
+<td>int</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>285</td>
+<td>accept</td>
+<td>0x11d</td>
+<td>int</td>
+<td>struct sockaddr *</td>
+<td>int *</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>286</td>
+<td>getsockname</td>
+<td>0x11e</td>
+<td>int</td>
+<td>struct sockaddr *</td>
+<td>int *</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>287</td>
+<td>getpeername</td>
+<td>0x11f</td>
+<td>int</td>
+<td>struct sockaddr *</td>
+<td>int *</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>288</td>
+<td>socketpair</td>
+<td>0x120</td>
+<td>int</td>
+<td>int</td>
+<td>int</td>
+<td>int *</td>
+<td>-</td>
+</tr>
+<tr>
+<td>289</td>
+<td>send</td>
+<td>0x121</td>
+<td>int</td>
+<td>void *</td>
+<td>size_t</td>
+<td>unsigned</td>
+<td>-</td>
+</tr>
+<tr>
+<td>290</td>
+<td>sendto</td>
+<td>0x122</td>
+<td>int</td>
+<td>void *</td>
+<td>size_t</td>
+<td>unsigned</td>
+<td>struct sockaddr *</td>
+</tr>
+<tr>
+<td>291</td>
+<td>recv</td>
+<td>0x123</td>
+<td>int</td>
+<td>void *</td>
+<td>size_t</td>
+<td>unsigned</td>
+<td>-</td>
+</tr>
+<tr>
+<td>292</td>
+<td>recvfrom</td>
+<td>0x124</td>
+<td>int</td>
+<td>void *</td>
+<td>size_t</td>
+<td>unsigned</td>
+<td>struct sockaddr *</td>
+</tr>
+<tr>
+<td>293</td>
+<td>shutdown</td>
+<td>0x125</td>
+<td>int</td>
+<td>int</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>294</td>
+<td>setsockopt</td>
+<td>0x126</td>
+<td>int fd</td>
+<td>int level</td>
+<td>int optname</td>
+<td>char *optval</td>
+<td>int optlen</td>
+</tr>
+<tr>
+<td>295</td>
+<td>getsockopt</td>
+<td>0x127</td>
+<td>int fd</td>
+<td>int level</td>
+<td>int optname</td>
+<td>char *optval</td>
+<td>int *optlen</td>
+</tr>
+<tr>
+<td>296</td>
+<td>sendmsg</td>
+<td>0x128</td>
+<td>int fd</td>
+<td>struct user_msghdr *msg</td>
+<td>unsigned flags</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>297</td>
+<td>recvmsg</td>
+<td>0x129</td>
+<td>int fd</td>
+<td>struct user_msghdr *msg</td>
+<td>unsigned flags</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>298</td>
+<td>semop</td>
+<td>0x12a</td>
+<td>int semid</td>
+<td>struct sembuf *sops</td>
+<td>unsigned nsops</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>299</td>
+<td>semget</td>
+<td>0x12b</td>
+<td>key_t key</td>
+<td>int nsems</td>
+<td>int semflg</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>300</td>
+<td>semctl</td>
+<td>0x12c</td>
+<td>int semid</td>
+<td>int semnum</td>
+<td>int cmd</td>
+<td>unsigned long arg</td>
+<td>-</td>
+</tr>
+<tr>
+<td>301</td>
+<td>msgsnd</td>
+<td>0x12d</td>
+<td>int msqid</td>
+<td>struct msgbuf *msgp</td>
+<td>size_t msgsz</td>
+<td>int msgflg</td>
+<td>-</td>
+</tr>
+<tr>
+<td>302</td>
+<td>msgrcv</td>
+<td>0x12e</td>
+<td>int msqid</td>
+<td>struct msgbuf *msgp</td>
+<td>size_t msgsz</td>
+<td>long msgtyp</td>
+<td>int msgflg</td>
+</tr>
+<tr>
+<td>303</td>
+<td>msgget</td>
+<td>0x12f</td>
+<td>key_t key</td>
+<td>int msgflg</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>304</td>
+<td>msgctl</td>
+<td>0x130</td>
+<td>int msqid</td>
+<td>int cmd</td>
+<td>struct msqid_ds *buf</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>305</td>
+<td>shmat</td>
+<td>0x131</td>
+<td>int shmid</td>
+<td>char *shmaddr</td>
+<td>int shmflg</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>306</td>
+<td>shmdt</td>
+<td>0x132</td>
+<td>char *shmaddr</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+</tbody></table></div>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://example.com">k4ra5u</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://example.com/2024/09/11/2024-09-11-arm_syscall/">http://example.com/2024/09/11/2024-09-11-arm_syscall/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2024/09/11/2024-09-11-d3trustedhttpd/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">d3trustedhttpd</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2024/09/11/2024-09-11-x86_syscall/"><span class="paginator-prev__text">x86_syscall</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#arm-syscall"><span class="toc-number">1.</span> <span class="toc-text">
+          arm syscall</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#arm64"><span class="toc-number">1.1.</span> <span class="toc-text">
+          arm64</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arm32"><span class="toc-number">1.2.</span> <span class="toc-text">
+          arm32</span></a></li></ol></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/images/icons/stun-logo.svg" alt="avatar"></div></div><div class="sidebar-ov-feed"></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">3</div><div class="sidebar-ov-state-item__name">归档</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span><span class="sidebar-reading-info__perc">%</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2024</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>k4ra5u</span></div><div><span>由 <a href="http://hexo.io/" title="Hexo" target="_blank" rel="noopener">Hexo</a> 强力驱动</span><span> v7.3.0</span><span class="footer__devider">|</span><span>主题 - <a href="https://github.com/liuyib/hexo-theme-stun/" title="Stun" target="_blank" rel="noopener">Stun</a></span><span> v2.8.0</span></div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="/js/utils.js?v=2.8.0"></script><script src="/js/stun-boot.js?v=2.8.0"></script><script src="/js/scroll.js?v=2.8.0"></script><script src="/js/header.js?v=2.8.0"></script><script src="/js/sidebar.js?v=2.8.0"></script></body></html>
